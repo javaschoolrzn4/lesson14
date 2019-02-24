@@ -1,6 +1,7 @@
 package ru.rzn.sbt.javaschool.functional;
 
 import java.io.BufferedReader;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -43,15 +44,13 @@ public class FunctionalLesson {
     }
 
     public void sort_f(List<Integer> list) {
-        Collections.sort(list, new Comparator<Integer> () {
-            @Override
-            public int compare(Integer o1, Integer o2) {
+        Collections.sort(list, (o1, o2) -> {
                 int s = 0, i1 = o1, i2 = o2;
                 do {s += i1 % 10;} while ((i1 = i1/10) > 0);
                 do {s -= i2 % 10;} while ((i2 = i2/10) > 0);
                 return s != 0 ? s : o1 - o2;
             }
-        });
+        );
     }
 
     /**
@@ -68,9 +67,7 @@ public class FunctionalLesson {
     }
 
     public void sout_f(List<String> list) {
-        for (String s: list) {
-            out.println(s);
-        }
+        list.forEach(out::println);
     }
 
     /**
@@ -128,10 +125,9 @@ public class FunctionalLesson {
     }
 
     public String ustas2alex_f(List<String> words) {
+
         StringBuilder sb = new StringBuilder(words.size());
-        for (String w: words) {
-            sb.append(w.charAt(w.length() / 2));
-        }
+        words.forEach(w -> sb.append(w.charAt(w.length() / 2)));
         return sb.toString();
     }
 
@@ -148,6 +144,7 @@ public class FunctionalLesson {
 
     public String properties_f(Map<String, Object> map) {
         StringBuilder sb = new StringBuilder();
+//        map.forEach(e -> );
         for (Map.Entry<String, Object> e: map.entrySet()) {
             sb.append(String.format("%s=%s\n", e.getKey(), e.getValue()));
         }
@@ -166,11 +163,9 @@ public class FunctionalLesson {
     }
 
     public List<String> lower_f(List<String> list) {
-        List<String> newList = new ArrayList<>(list.size());
-        for (String s: list) {
-            newList.add(s.toLowerCase());
-        }
-        return newList;
+        return list.stream()
+                .map(s -> s.toLowerCase())
+                .collect(toList());
     }
 
     /**
@@ -187,13 +182,10 @@ public class FunctionalLesson {
     }
 
     public List<String> lowerAndOdd_f(List<String> list) {
-        List<String> newList = new ArrayList<>(list.size());
-        for (String s: list) {
-            if(s.length() % 2 == 1) {
-                newList.add(s.toLowerCase());
-            }
-        }
-        return newList;
+        return list.stream()
+                .filter(s -> s.length() % 2 == 1)
+                .map(s -> s.toLowerCase())
+                .collect(toList());
     }
 
     public static final String THIS_FILE = "src/main/java/ru/rzn/sbt/javaschool/functional/FunctionalLesson.java";
@@ -213,8 +205,10 @@ public class FunctionalLesson {
 
     /** Hint: BufferedReader can produce a Stream! */
     public long count_f() throws Exception {
+//        BufferedReader reader = Files.newBufferedReader(Paths.get(THIS_FILE));
         long count = 0;
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(THIS_FILE))) {
+            reader.
             while (reader.readLine() != null) {
                 count++;
             }
