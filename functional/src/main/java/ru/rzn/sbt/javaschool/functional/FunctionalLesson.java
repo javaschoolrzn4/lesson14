@@ -1,30 +1,45 @@
 package ru.rzn.sbt.javaschool.functional;
 
 import java.io.BufferedReader;
-import java.io.PrintStream;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static java.lang.System.out;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Java 8: lambdas and stream API.<br/>
- * <br/>
- * Как работать с эти классом:<br/>
- * 0. Снять галочку в Ctrl+Alt+S -> Editor -> Inspections -> Java -> Java language level migration aids -> Java8 <br/>
- * 1. Всё уже написано за вас. Запускаем, проверяем зелёные тесты.<br/>
- * 2. У каждого метода, реализованного в императивном стиле, есть метод-дублёр (с суффиксом {@code _f} на конце).<br/>
- * 3. Реализуйте в методе-дублёре ту же функциональность, используя lambdas и stream API.<br/>
- * 4. Запустите тесты и проверьте себя.<br/>
- * 5. Перепишите свой код ещё более коротко и красиво :)<br/>
- * <br/>
- */
+* Java 8: lambdas and stream API.<br/>
+* <br/>
+* Как работать с эти классом:<br/>
+* 0. Снять галочку в Ctrl+Alt+S -> Editor -> Inspections -> Java -> Java language level migration aids -> Java8 <br/>
+* 1. Всё уже написано за вас. Запускаем, проверяем зелёные тесты.<br/>
+* 2. У каждого метода, реализованного в императивном стиле, есть метод-дублёр (с суффиксом {@code _f} на конце).<br/>
+* 3. Реализуйте в методе-дублёре ту же функциональность, используя lambdas и stream API.<br/>
+* 4. Запустите тесты и проверьте себя.<br/>
+* 5. Перепишите свой код ещё более коротко и красиво :)<br/>
+* <br/>
+*/
 public class FunctionalLesson {
+    public void main(String[] args) {
+        this.answer42(Collections.singletonList("tetTTRr"));
+    }
 
     /**
      * Упражнение 1. По порядку становись!<br/>
@@ -32,12 +47,16 @@ public class FunctionalLesson {
      * + для тех, кому скучно: сформулируйте правило сортировки словами и запишите в комментарий
      */
     public void sort(List<Integer> list) {
-        Collections.sort(list, new Comparator<Integer> () {
+        Collections.sort(list, new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) {
                 int s = 0, i1 = o1, i2 = o2;
-                do {s += i1 % 10;} while ((i1 = i1/10) > 0);
-                do {s -= i2 % 10;} while ((i2 = i2/10) > 0);
+                do {
+                    s += i1 % 10;
+                } while ((i1 = i1 / 10) > 0);
+                do {
+                    s -= i2 % 10;
+                } while ((i2 = i2 / 10) > 0);
                 return s != 0 ? s : o1 - o2;
             }
         });
@@ -45,11 +64,15 @@ public class FunctionalLesson {
 
     public void sort_f(List<Integer> list) {
         Collections.sort(list, (o1, o2) -> {
-                int s = 0, i1 = o1, i2 = o2;
-                do {s += i1 % 10;} while ((i1 = i1/10) > 0);
-                do {s -= i2 % 10;} while ((i2 = i2/10) > 0);
-                return s != 0 ? s : o1 - o2;
-            }
+                             int s = 0, i1 = o1, i2 = o2;
+                             do {
+                                 s += i1 % 10;
+                             } while ((i1 = i1 / 10) > 0);
+                             do {
+                                 s -= i2 % 10;
+                             } while ((i2 = i2 / 10) > 0);
+                             return s != 0 ? s : o1 - o2;
+                         }
         );
     }
 
@@ -61,7 +84,7 @@ public class FunctionalLesson {
      * объекта системного потока вывода.<br/>
      */
     public void sout(List<String> list) {
-        for (String s: list) {
+        for (String s : list) {
             out.println(s);
         }
     }
@@ -83,12 +106,7 @@ public class FunctionalLesson {
     }
 
     public void mayTheOddsBeEverInYourFavor_f(List<String> list) {
-        Iterator<String> i = list.iterator();
-        while (i.hasNext()) {
-            if (i.next().length() % 2 == 0) {
-                i.remove();
-            }
-        }
+        list.removeIf(s -> s.length() % 2 == 0);
     }
 
     /**
@@ -102,10 +120,11 @@ public class FunctionalLesson {
     }
 
     public void answer42_f(List<String> myStrings) {
-        ListIterator<String> i = myStrings.listIterator();
-        while (i.hasNext()) {
-            i.set(i.next().toUpperCase());
-        }
+        final List<String> list = myStrings.stream()
+                                           .map(String::toUpperCase)
+                                           .collect(toList());
+        myStrings.clear();
+        myStrings.addAll(list);
     }
 
     /*
@@ -113,19 +132,23 @@ public class FunctionalLesson {
      * Перепишите тело метода answer42_f так, чтобы оно уложилось в 42 символа (не считая пробельных символов)
      */
 
+    public void answer42_f_42(List<String> myStrings) {
+        myStrings.replaceAll(String::toUpperCase);
+    }
+
+
     /**
      * Упражнение 6. Шифровка в центр.
      */
     public String ustas2alex(List<String> words) {
         StringBuilder sb = new StringBuilder(words.size());
-        for (String w: words) {
-            sb.append(w.charAt(w.length() / 2));
+        for (String w : words) {
+           sb.append(w.charAt(w.length() / 2));
         }
         return sb.toString();
     }
 
     public String ustas2alex_f(List<String> words) {
-
         StringBuilder sb = new StringBuilder(words.size());
         words.forEach(w -> sb.append(w.charAt(w.length() / 2)));
         return sb.toString();
@@ -136,7 +159,7 @@ public class FunctionalLesson {
      */
     public String properties(Map<String, Object> map) {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, Object> e: map.entrySet()) {
+        for (Map.Entry<String, Object> e : map.entrySet()) {
             sb.append(String.format("%s=%s\n", e.getKey(), e.getValue()));
         }
         return sb.toString();
@@ -144,10 +167,7 @@ public class FunctionalLesson {
 
     public String properties_f(Map<String, Object> map) {
         StringBuilder sb = new StringBuilder();
-//        map.forEach(e -> );
-        for (Map.Entry<String, Object> e: map.entrySet()) {
-            sb.append(String.format("%s=%s\n", e.getKey(), e.getValue()));
-        }
+        map.forEach((key, value) -> sb.append(String.format("%s=%s\n", key, value)));
         return sb.toString();
     }
 
@@ -156,7 +176,7 @@ public class FunctionalLesson {
      */
     public List<String> lower(List<String> list) {
         List<String> newList = new ArrayList<>(list.size());
-        for (String s: list) {
+        for (String s : list) {
             newList.add(s.toLowerCase());
         }
         return newList;
@@ -164,8 +184,8 @@ public class FunctionalLesson {
 
     public List<String> lower_f(List<String> list) {
         return list.stream()
-                .map(s -> s.toLowerCase())
-                .collect(toList());
+                   .map(String::toLowerCase)
+                   .collect(toList());
     }
 
     /**
@@ -173,8 +193,8 @@ public class FunctionalLesson {
      */
     public List<String> lowerAndOdd(List<String> list) {
         List<String> newList = new ArrayList<>(list.size());
-        for (String s: list) {
-            if(s.length() % 2 == 1) {
+        for (String s : list) {
+            if (s.length() % 2 == 1) {
                 newList.add(s.toLowerCase());
             }
         }
@@ -183,9 +203,9 @@ public class FunctionalLesson {
 
     public List<String> lowerAndOdd_f(List<String> list) {
         return list.stream()
-                .filter(s -> s.length() % 2 == 1)
-                .map(s -> s.toLowerCase())
-                .collect(toList());
+                   .filter(s -> s.length() % 2 == 1)
+                   .map(String::toLowerCase)
+                   .collect(toList());
     }
 
     public static final String THIS_FILE = "src/main/java/ru/rzn/sbt/javaschool/functional/FunctionalLesson.java";
@@ -198,25 +218,20 @@ public class FunctionalLesson {
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(THIS_FILE))) {
             while (reader.readLine() != null) {
                 count++;
-            }
+           }
         }
         return count;
     }
 
-    /** Hint: BufferedReader can produce a Stream! */
+    /**
+     * Hint: BufferedReader can produce a Stream!
+     */
     public long count_f() throws Exception {
-//        BufferedReader reader = Files.newBufferedReader(Paths.get(THIS_FILE));
-        long count = 0;
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(THIS_FILE))) {
-            reader.
-            while (reader.readLine() != null) {
-                count++;
-            }
-        }
-        return count;
+        return Files.lines(Paths.get(THIS_FILE)).count();
     }
 
     public static final String WORD_DELIMITERS = "[\\s\\(\\+-.:;,]+";
+
     /**
      * Упражнение 11. Every word counts.
      */
@@ -225,21 +240,24 @@ public class FunctionalLesson {
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(THIS_FILE))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                count+= line.split(WORD_DELIMITERS).length;
+                count += line.split(WORD_DELIMITERS).length;
             }
         }
         return count;
     }
 
     public long countWords_f() throws Exception {
-        long count = 0;
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(THIS_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                count+= line.split(WORD_DELIMITERS).length;
-            }
-        }
-        return count;
+        return Files.lines(Paths.get(THIS_FILE))
+                .map(e -> e.split(WORD_DELIMITERS).length)
+                .reduce(0, (a, b) -> a + b);
+
+//        variant 2:
+//        final File f = new File(THIS_FILE);
+//        BufferedReader br = new BufferedReader(new FileReader(f));
+//        return br.lines()
+//                 .map(string -> Arrays.asList(string.split(WORD_DELIMITERS)))
+//                 .flatMap(Collection::stream)
+//                 .reduce(0, (integer, s) -> integer + 1, (integer, integer2) -> integer + integer2);
     }
 
     /**
@@ -252,8 +270,8 @@ public class FunctionalLesson {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] newWords = line.split(WORD_DELIMITERS);
-                for (String w: newWords) {
-                    if(w.toLowerCase().startsWith("f")) {
+                for (String w : newWords) {
+                    if (w.toLowerCase().startsWith("f")) {
                         words.add(w);
                     }
                 }
@@ -261,8 +279,8 @@ public class FunctionalLesson {
         }
 
         List<String> uniqueWords = new ArrayList<>();
-        for (String w: words) {
-            if(!uniqueWords.contains(w)) {
+        for (String w : words) {
+            if (!uniqueWords.contains(w)) {
                 uniqueWords.add(w);
             }
         }
@@ -271,8 +289,8 @@ public class FunctionalLesson {
 
         StringBuilder result = new StringBuilder();
         boolean first = true;
-        for (String w: uniqueWords) {
-            if(first) {
+        for (String w : uniqueWords) {
+            if (first) {
                 first = false;
             } else {
                 result.append(" ");
@@ -282,42 +300,17 @@ public class FunctionalLesson {
         return result.toString();
     }
 
-    /** Hint: Collectors.joining() helps a lot! */
+    /**
+     * Hint: Collectors.joining() helps a lot!
+     */
     public String fWord_f() throws Exception {
-        List<String> words = new ArrayList<>();
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(THIS_FILE))
-        ) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] newWords = line.split(WORD_DELIMITERS);
-                for (String w: newWords) {
-                    if(w.toLowerCase().startsWith("f")) {
-                        words.add(w);
-                    }
-                }
-            }
-        }
-
-        List<String> uniqueWords = new ArrayList<>();
-        for (String w: words) {
-            if(!uniqueWords.contains(w)) {
-                uniqueWords.add(w);
-            }
-        }
-
-        Collections.sort(uniqueWords);
-
-        StringBuilder result = new StringBuilder();
-        boolean first = true;
-        for (String w: uniqueWords) {
-            if(first) {
-                first = false;
-            } else {
-                result.append(" ");
-            }
-            result.append(w);
-        }
-        return result.toString();
+        final List<String> f = Files.lines(Paths.get(THIS_FILE))
+                                    .flatMap(e -> Stream.of(e.split(WORD_DELIMITERS)))
+                                    .filter(w -> w.toLowerCase().startsWith("f"))
+                                    .distinct()
+                                    .sorted()
+                                    .collect(toList());
+        return String.join(" ", f);
     }
 
 
